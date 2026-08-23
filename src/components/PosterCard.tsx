@@ -22,7 +22,7 @@ interface PosterCardProps {
 }
 
 const carouselWidth =
-  'w-[38vw] max-w-[160px] sm:w-[calc((100vw-4rem)/4)] sm:max-w-none md:w-[calc((100vw-6rem)/5)] lg:w-[calc((100vw-8rem)/7)] xl:w-[180px]';
+  'w-[calc((100vw-2rem-0.625rem)/2.15)] max-w-[168px] sm:w-[calc((100vw-4rem)/3.5)] sm:max-w-none md:w-[calc((100vw-6rem)/5)] lg:w-[calc((100vw-8rem)/7)] xl:w-[180px]';
 
 export default function PosterCard({
   item,
@@ -52,8 +52,8 @@ export default function PosterCard({
               src={posterUrl}
               alt={title}
               fill
-              sizes="(max-width: 640px) 40vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 180px"
-              className="object-cover transition-transform duration-500 ease-out md:group-hover:scale-[1.03]"
+              sizes="(max-width: 640px) 46vw, (max-width: 768px) 28vw, (max-width: 1024px) 20vw, 180px"
+              className="object-cover object-top transition-transform duration-500 ease-out md:group-hover:scale-[1.03]"
               priority={priority}
             />
           ) : (

@@ -21,6 +21,7 @@ import {
   getImageUrl,
   getWatchHref,
   getYear,
+  POSTER_SIZES,
 } from '@/lib/utils';
 import { useWatchlistStore } from '@/store/watchlist';
 
@@ -42,6 +43,7 @@ export default function DetailHeader({
     details.backdrop_path,
     BACKDROP_SIZES.original
   );
+  const posterUrl = getImageUrl(details.poster_path, POSTER_SIZES.large);
   const watchHref = getWatchHref({ id: details.id, media_type: mediaType });
   const primaryGenre = details.genres?.[0]?.name;
 
@@ -57,20 +59,56 @@ export default function DetailHeader({
       : null;
 
   return (
-    <section className="relative min-h-[70vh] w-full">
-      {backdropUrl && (
-        <div className="absolute inset-0">
+    <section className="relative min-h-[70vh] w-full overflow-hidden">
+      {/* Mobile: portrait poster */}
+      {posterUrl ? (
+        <div className="absolute inset-0 md:hidden">
+          <Image
+            src={posterUrl}
+            alt={title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-top"
+          />
+        </div>
+      ) : backdropUrl ? (
+        <div className="absolute inset-0 md:hidden">
           <Image
             src={backdropUrl}
             alt={title}
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className="object-cover object-[center_25%]"
           />
         </div>
-      )}
+      ) : null}
 
+      {/* Desktop: landscape backdrop */}
+      {backdropUrl ? (
+        <div className="absolute inset-0 hidden md:block">
+          <Image
+            src={backdropUrl}
+            alt={title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
+      ) : posterUrl ? (
+        <div className="absolute inset-0 hidden md:block">
+          <Image
+            src={posterUrl}
+            alt={title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-top"
+          />
+        </div>
+      ) : null}
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 

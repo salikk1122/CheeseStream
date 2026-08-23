@@ -15,6 +15,7 @@ import {
   getPrimaryGenreName,
   getWatchHref,
   getYear,
+  POSTER_SIZES,
 } from '@/lib/utils';
 import { useWatchlistStore } from '@/store/watchlist';
 
@@ -67,23 +68,62 @@ export default function Hero({ items }: HeroProps) {
       onMouseLeave={() => setIsPaused(false)}
     >
       {featured.map((item, index) => {
-        const url = getImageUrl(item.backdrop_path, BACKDROP_SIZES.original);
-        if (!url) return null;
+        const backdropUrl = getImageUrl(
+          item.backdrop_path,
+          BACKDROP_SIZES.original
+        );
+        const posterUrl = getImageUrl(item.poster_path, POSTER_SIZES.large);
+        const isActive = index === currentIndex;
+
         return (
           <div
             key={item.id}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentIndex ? 'opacity-100' : 'opacity-0'
+              isActive ? 'opacity-100' : 'opacity-0'
             }`}
+            aria-hidden={!isActive}
           >
-            <Image
-              src={url}
-              alt={getMediaTitle(item)}
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              className="object-cover object-center"
-            />
+            {/* Mobile: portrait poster fits the tall viewport */}
+            {posterUrl ? (
+              <Image
+                src={posterUrl}
+                alt={getMediaTitle(item)}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover object-top md:hidden"
+              />
+            ) : backdropUrl ? (
+              <Image
+                src={backdropUrl}
+                alt={getMediaTitle(item)}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover object-[center_25%] md:hidden"
+              />
+            ) : null}
+
+            {/* Desktop / tablet: wide backdrop */}
+            {backdropUrl ? (
+              <Image
+                src={backdropUrl}
+                alt={getMediaTitle(item)}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="hidden object-cover object-center md:block"
+              />
+            ) : posterUrl ? (
+              <Image
+                src={posterUrl}
+                alt={getMediaTitle(item)}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="hidden object-cover object-top md:block"
+              />
+            ) : null}
           </div>
         );
       })}
