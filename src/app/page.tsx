@@ -37,7 +37,7 @@ export default async function HomePage() {
     <>
       <Hero items={heroItems} />
 
-      <div className="-mt-8 relative z-10 space-y-2 pb-8">
+      <div className="-mt-16 relative z-10 space-y-2 pb-8 md:-mt-20">
         <CarouselRow
           title="Trending Movies"
           items={trendingMovies.results}
