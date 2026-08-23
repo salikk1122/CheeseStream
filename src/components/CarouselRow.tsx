@@ -12,6 +12,8 @@ interface CarouselRowProps {
   items: MediaItem[];
   viewAllHref?: string;
   loading?: boolean;
+  /** First row after hero — extra top breathing room */
+  leading?: boolean;
 }
 
 export default function CarouselRow({
@@ -19,6 +21,7 @@ export default function CarouselRow({
   items,
   viewAllHref,
   loading = false,
+  leading = false,
 }: CarouselRowProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
@@ -56,18 +59,18 @@ export default function CarouselRow({
 
   return (
     <section
-      className="group/row relative mb-6 sm:mb-8 md:mb-10"
+      className={`group/row relative ${leading ? 'pt-1' : ''} mb-7 sm:mb-9 md:mb-11`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="mb-3 flex items-end justify-between gap-3 px-4 sm:mb-4 md:px-8 lg:px-12">
-        <h2 className="font-display text-lg tracking-wide text-white sm:text-xl md:text-2xl">
+      <div className="mb-3 flex items-center justify-between gap-4 px-4 sm:mb-4 md:px-8 lg:px-12">
+        <h2 className="text-[0.95rem] font-semibold tracking-tight text-white/95 sm:text-base md:text-lg">
           {title}
         </h2>
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="shrink-0 text-xs font-medium text-muted transition-colors hover:text-accent sm:text-sm"
+            className="shrink-0 text-xs font-medium text-white/45 transition-colors hover:text-white/80 sm:text-sm"
           >
             View All &rarr;
           </Link>
@@ -77,8 +80,9 @@ export default function CarouselRow({
       <div className="relative">
         {canScrollLeft && isHovered && (
           <button
+            type="button"
             onClick={() => scroll('left')}
-            className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/70 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/90 md:block"
+            className="absolute left-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/65 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/85 md:flex"
             aria-label="Scroll left"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -86,7 +90,7 @@ export default function CarouselRow({
         )}
 
         <div className="overflow-hidden px-4 md:px-8 lg:px-12" ref={emblaRef}>
-          <div className="flex gap-2.5 py-3 sm:gap-3 sm:py-4 md:gap-4 md:py-6">
+          <div className="flex gap-3 py-0.5 sm:gap-3.5 md:gap-4">
             {loading
               ? Array.from({ length: 8 }).map((_, i) => (
                   <PosterCardSkeleton key={i} />
@@ -103,8 +107,9 @@ export default function CarouselRow({
 
         {canScrollRight && isHovered && (
           <button
+            type="button"
             onClick={() => scroll('right')}
-            className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/70 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/90 md:block"
+            className="absolute right-1 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/65 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/85 md:flex"
             aria-label="Scroll right"
           >
             <ChevronRight className="h-6 w-6" />

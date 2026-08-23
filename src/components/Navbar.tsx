@@ -51,11 +51,7 @@ export default function Navbar() {
         <div className="pointer-events-auto flex items-center justify-between gap-2 sm:gap-4">
           <Logo
             compact={scrolled}
-            className={`origin-left transition-all duration-300 ease-out ${
-              scrolled
-                ? 'scale-100 opacity-100 max-md:-translate-y-0'
-                : 'scale-95 opacity-100 md:scale-90 md:opacity-90'
-            }`}
+            className="origin-left transition-all duration-300 ease-out"
           />
 
           {/* Desktop / tablet: glass pill nav */}

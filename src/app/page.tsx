@@ -76,12 +76,14 @@ export default async function HomePage() {
         </section>
       )}
 
-      <div className="-mt-10 relative z-10 space-y-1 pb-8 sm:-mt-14 md:-mt-20 md:space-y-2">
-        <CarouselRow
-          title="Trending Movies"
-          items={trendingMovies.results}
-          viewAllHref="/movies"
-        />
+      <section className="relative bg-background pb-10 pt-6 sm:pt-8 md:pb-12 md:pt-10">
+        <div className="space-y-1 sm:space-y-2 md:space-y-3">
+          <CarouselRow
+            title="Trending Movies"
+            items={trendingMovies.results}
+            viewAllHref="/movies"
+            leading
+          />
         <CarouselRow
           title="Trending Series"
           items={trendingTV.results}
@@ -100,7 +102,8 @@ export default async function HomePage() {
           title="Top Rated Series"
           items={topRatedTV.results.slice(0, 15)}
         />
-      </div>
+        </div>
+      </section>
     </>
   );
 }

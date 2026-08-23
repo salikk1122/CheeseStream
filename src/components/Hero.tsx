@@ -48,7 +48,7 @@ export default function Hero({ items }: HeroProps) {
 
   if (featured.length === 0) {
     return (
-      <div className="relative h-[85dvh] min-h-[520px] w-full skeleton md:h-[100dvh] md:min-h-[640px]" />
+      <div className="relative h-[100dvh] min-h-[100svh] w-full skeleton" />
     );
   }
 
@@ -63,7 +63,7 @@ export default function Hero({ items }: HeroProps) {
 
   return (
     <section
-      className="relative h-[85dvh] min-h-[520px] w-full overflow-hidden md:h-[100dvh] md:min-h-[640px]"
+      className="relative h-[100dvh] min-h-[100svh] w-full overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -129,9 +129,10 @@ export default function Hero({ items }: HeroProps) {
       })}
 
       <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/55 to-transparent md:from-background/90 md:via-background/40" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-black/30 md:via-background/20 md:to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-black/20 md:via-background/25 md:to-black/15" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent md:h-36" />
 
-      <div className="relative flex h-full items-end px-4 pb-24 pt-24 sm:px-6 sm:pb-28 md:px-8 md:pb-32 md:pt-28 lg:px-12">
+      <div className="relative flex h-full items-end px-4 pb-32 pt-28 sm:px-6 sm:pb-36 md:px-8 md:pb-20 md:pt-28 lg:px-12">
         <div className="max-w-3xl space-y-3 sm:space-y-4 md:space-y-6">
           <h1 className="font-display text-[2.75rem] leading-[0.9] tracking-wide text-white drop-shadow-lg sm:text-6xl md:text-8xl lg:text-9xl">
             {title}
@@ -215,7 +216,7 @@ export default function Hero({ items }: HeroProps) {
 
       {featured.length > 1 && (
         <div
-          className="absolute bottom-[4.75rem] left-1/2 flex -translate-x-1/2 items-center gap-2 md:bottom-12"
+          className="absolute bottom-28 left-1/2 flex -translate-x-1/2 items-center gap-2 md:bottom-12"
           role="tablist"
           aria-label="Featured titles"
         >
