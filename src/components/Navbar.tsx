@@ -52,7 +52,9 @@ export default function Navbar() {
           <Logo
             compact={scrolled}
             className={`origin-left transition-all duration-300 ease-out ${
-              scrolled ? 'scale-100 opacity-100' : 'scale-90 opacity-90'
+              scrolled
+                ? 'scale-100 opacity-100 max-md:-translate-y-0'
+                : 'scale-95 opacity-100 md:scale-90 md:opacity-90'
             }`}
           />
 
