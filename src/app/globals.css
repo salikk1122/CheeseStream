@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-white antialiased;
+  }
+
+  /* Hide scrollbar for carousel rows while keeping scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  .skeleton {
+    @apply animate-shimmer bg-gradient-to-r from-surface via-zinc-800 to-surface bg-[length:200%_100%];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-6 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-white/20 px-6 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/30;
+  }
+
+  /* Frosted glass surface for floating nav and panels */
+  .glass-pill {
+    @apply border border-white/20 bg-white/[0.07] shadow-[0_8px_32px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-1px_0_rgba(255,255,255,0.04)] backdrop-blur-2xl backdrop-saturate-150;
+  }
+
+  .glass-pill-active {
+    @apply border border-white/40 bg-white/90 text-black shadow-[0_2px_12px_rgba(255,255,255,0.15),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md;
+  }
+
+  .glass-icon-btn {
+    @apply text-white/80 transition-colors hover:bg-white/10 hover:text-white;
+  }
+
+  @keyframes hero-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .hero-progress-fill {
+    animation: hero-progress 5s linear forwards;
+    transform-origin: left;
+  }
+
+  .hero-progress-fill.paused {
+    animation-play-state: paused;
+  }
+}
