@@ -5,11 +5,31 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-white antialiased;
     padding-bottom: env(safe-area-inset-bottom);
+    overflow-x: hidden;
+  }
+
+  /* Hide scrollbars everywhere (desktop + mobile) while keeping scroll */
+  *,
+  *::before,
+  *::after {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar,
+  *::-webkit-scrollbar-button,
+  *::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-track {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 
   /* Hide scrollbar for carousel rows while keeping scroll functionality */
@@ -20,6 +40,8 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+    width: 0;
+    height: 0;
   }
 }
 
