@@ -26,6 +26,13 @@ export const metadata: Metadata = {
     'Browse movies and TV shows with CheeseStream. Discover trending titles, watch trailers, and build your watchlist.',
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover' as const,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -33,9 +40,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${bebasNeue.variable}`}>
-      <body className="min-h-screen font-sans">
+      <body className="min-h-screen overflow-x-hidden font-sans">
         <Navbar />
-        <main>{children}</main>
+        <main className="min-w-0">{children}</main>
         <Footer />
       </body>
     </html>

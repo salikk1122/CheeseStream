@@ -74,18 +74,18 @@ export default function DetailHeader({
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
-      <div className="relative px-4 pb-12 pt-28 md:px-8 lg:px-12">
-        <div className="max-w-3xl space-y-5">
-          <h1 className="font-display text-4xl tracking-wide text-white md:text-6xl lg:text-7xl">
+      <div className="relative px-4 pb-10 pt-24 sm:pb-12 sm:pt-28 md:px-8 lg:px-12">
+        <div className="max-w-3xl space-y-4 sm:space-y-5">
+          <h1 className="font-display text-3xl tracking-wide text-white sm:text-4xl md:text-6xl lg:text-7xl">
             {title}
           </h1>
 
           {details.tagline && (
-            <p className="text-lg italic text-white/70">{details.tagline}</p>
+            <p className="text-base italic text-white/70 sm:text-lg">{details.tagline}</p>
           )}
 
           {/* Rating · Year · Genre (and runtime when available) */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white md:text-base">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-white sm:gap-x-3 sm:text-sm md:text-base">
             <span className="inline-flex items-center gap-1.5">
               <Star className="h-4 w-4 fill-white text-white" />
               {formatRating(details.vote_average)}/10
@@ -147,9 +147,9 @@ export default function DetailHeader({
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
               href={watchHref}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02] hover:bg-white/95 md:text-base"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-transform active:scale-[0.98] hover:scale-[1.02] hover:bg-white/95 sm:px-7 sm:py-3 md:text-base"
             >
-              <Play className="h-5 w-5 fill-black" />
+              <Play className="h-4 w-4 fill-black sm:h-5 sm:w-5" />
               Play
             </Link>
 
@@ -165,23 +165,23 @@ export default function DetailHeader({
                     vote_average: details.vote_average,
                   })
                 }
-                className="flex h-12 w-12 items-center justify-center text-white transition-colors hover:bg-white/10"
+                className="flex h-10 w-10 items-center justify-center text-white transition-colors hover:bg-white/10 sm:h-12 sm:w-12"
                 aria-label={inList ? 'Remove from My List' : 'Add to My List'}
               >
                 {inList ? (
-                  <Check className="h-5 w-5 text-accent" />
+                  <Check className="h-4 w-4 text-accent sm:h-5 sm:w-5" />
                 ) : (
-                  <Plus className="h-5 w-5" strokeWidth={2.25} />
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.25} />
                 )}
               </button>
-              <div className="h-6 w-px bg-white/25" aria-hidden="true" />
+              <div className="h-5 w-px bg-white/25 sm:h-6" aria-hidden="true" />
               <button
                 type="button"
                 onClick={() => setExpanded((prev) => !prev)}
-                className="flex h-12 w-12 items-center justify-center text-white transition-colors hover:bg-white/10"
+                className="flex h-10 w-10 items-center justify-center text-white transition-colors hover:bg-white/10 sm:h-12 sm:w-12"
                 aria-label={expanded ? 'Collapse overview' : 'Expand overview'}
               >
-                <CircleHelp className="h-5 w-5" />
+                <CircleHelp className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>

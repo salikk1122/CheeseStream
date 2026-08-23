@@ -14,11 +14,11 @@ export default function CastRow({ cast }: CastRowProps) {
   if (topCast.length === 0) return null;
 
   return (
-    <section className="mb-10 px-4 md:px-8 lg:px-12">
-      <h2 className="mb-4 font-display text-xl tracking-wide text-white md:text-2xl">
+    <section className="mb-8 sm:mb-10">
+      <h2 className="mb-3 font-display text-lg tracking-wide text-white sm:mb-4 sm:text-xl md:text-2xl">
         Cast
       </h2>
-      <div className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
+      <div className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:gap-4 sm:px-0">
         {topCast.map((member) => {
           const profileUrl = getImageUrl(
             member.profile_path,
@@ -27,9 +27,9 @@ export default function CastRow({ cast }: CastRowProps) {
           return (
             <div
               key={member.id}
-              className="w-28 shrink-0 snap-start text-center md:w-32"
+              className="w-24 shrink-0 snap-start text-center sm:w-28 md:w-32"
             >
-              <div className="relative mx-auto aspect-square w-24 overflow-hidden rounded-full bg-surface md:w-28">
+              <div className="relative mx-auto aspect-square w-20 overflow-hidden rounded-full bg-surface sm:w-24 md:w-28">
                 {profileUrl ? (
                   <Image
                     src={profileUrl}

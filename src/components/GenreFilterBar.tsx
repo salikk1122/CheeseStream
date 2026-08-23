@@ -25,10 +25,10 @@ export default function GenreFilterBar({
   };
 
   return (
-    <div className="scrollbar-hide mb-8 flex gap-2 overflow-x-auto px-4 pb-2 md:px-8 lg:px-12">
+    <div className="scrollbar-hide mb-6 flex gap-2 overflow-x-auto px-4 pb-2 sm:mb-8 md:px-8 lg:px-12">
       <button
         onClick={() => handleSelect(null)}
-        className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+        className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
           !activeGenre
             ? 'bg-accent text-black'
             : 'bg-white/10 text-gray-300 hover:bg-white/20'
@@ -40,7 +40,7 @@ export default function GenreFilterBar({
         <button
           key={genre.id}
           onClick={() => handleSelect(genre.id)}
-          className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm ${
             activeGenre === String(genre.id)
               ? 'bg-accent text-black'
               : 'bg-white/10 text-gray-300 hover:bg-white/20'

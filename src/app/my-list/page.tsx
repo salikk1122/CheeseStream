@@ -7,8 +7,8 @@ export const metadata: Metadata = {
 
 export default function MyListPage() {
   return (
-    <div className="min-h-screen px-4 pb-12 pt-24 md:px-8 lg:px-12">
-      <h1 className="mb-8 font-display text-3xl tracking-wide text-white md:text-4xl">
+    <div className="min-h-screen px-4 pb-24 pt-20 sm:pt-24 md:px-8 md:pb-12 lg:px-12">
+      <h1 className="mb-6 font-display text-2xl tracking-wide text-white sm:mb-8 sm:text-3xl md:text-4xl">
         My List
       </h1>
       <MyListGrid />

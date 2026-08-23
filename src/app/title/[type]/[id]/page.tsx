@@ -5,9 +5,10 @@ import DetailHeader from '@/components/DetailHeader';
 import CastRow from '@/components/CastRow';
 import MetadataPanel from '@/components/MetadataPanel';
 import CarouselRow from '@/components/CarouselRow';
-import { getCredits, getDetails, getSimilar } from '@/lib/tmdb';
+import { getCredits, getDetails, getSimilar, isTmdbNetworkError } from '@/lib/tmdb';
 import { getDetailsTitle } from '@/types';
 import { notFound } from 'next/navigation';
+import ContentUnavailable from '@/components/ContentUnavailable';
 
 interface PageProps {
   params: { type: string; id: string };
@@ -44,17 +45,24 @@ export default async function TitlePage({ params }: PageProps) {
       getCredits(mediaType, params.id),
       getSimilar(mediaType, params.id),
     ]);
-  } catch {
+  } catch (error) {
+    if (isTmdbNetworkError(error)) {
+      return (
+        <div className="pb-24 pt-20 md:pb-12">
+          <ContentUnavailable />
+        </div>
+      );
+    }
     notFound();
   }
 
   return (
-    <div className="pb-12">
+    <div className="pb-24 md:pb-12">
       <DetailHeader details={details} mediaType={mediaType} />
 
       <div className="px-4 md:px-8 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="min-w-0 lg:col-span-2">
             <CastRow cast={credits.cast} />
           </div>
           <div className="lg:col-span-1">

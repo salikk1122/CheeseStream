@@ -1,3 +1,6 @@
+import dns from 'node:dns';
+import https from 'node:https';
+import 'server-only';
 import type {
   CastMember,
   Credits,
@@ -12,37 +15,161 @@ import type {
   VideosResponse,
 } from '@/types';
 
+// Prefer IPv4 — avoids intermittent "fetch failed" when IPv6 routes are broken
+dns.setDefaultResultOrder('ipv4first');
+
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const MAX_ATTEMPTS = 3;
+const REQUEST_TIMEOUT_MS = 20000;
+
+const httpsAgent = new https.Agent({ keepAlive: true, family: 4 });
+
+const isNodeServer =
+  typeof process !== 'undefined' && Boolean(process.versions?.node);
 
 type MediaType = 'movie' | 'tv';
 
-function buildAuth(url: URL): HeadersInit {
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+export class TmdbError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'network' | 'auth' | 'http' | 'config'
+  ) {
+    super(message);
+    this.name = 'TmdbError';
+  }
+}
 
-  // Prefer v4 read access token (Bearer auth)
+function getEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value || undefined;
+}
+
+function buildAuth(url: URL): HeadersInit {
+  const headers: HeadersInit = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+
   const readToken =
-    process.env.API_READ_ACCESS_TOKEN ??
-    process.env.TMDB_READ_ACCESS_TOKEN;
+    getEnv('API_READ_ACCESS_TOKEN') ?? getEnv('TMDB_READ_ACCESS_TOKEN');
 
   if (readToken) {
     return { ...headers, Authorization: `Bearer ${readToken}` };
   }
 
-  const apiKey = process.env.TMDB_API_KEY;
+  const apiKey = getEnv('TMDB_API_KEY');
   if (!apiKey) {
-    throw new Error(
-      'TMDB credentials not set. Add API_READ_ACCESS_TOKEN or TMDB_API_KEY to .env.local'
+    throw new TmdbError(
+      'TMDB credentials not set. Add API_READ_ACCESS_TOKEN or TMDB_API_KEY to .env.local.',
+      'config'
     );
   }
 
-  // JWT-shaped value stored in TMDB_API_KEY → treat as Bearer token
   if (apiKey.startsWith('eyJ')) {
     return { ...headers, Authorization: `Bearer ${apiKey}` };
   }
 
-  // v3 API key → query-string auth
   url.searchParams.set('api_key', apiKey);
   return headers;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function headersToRecord(headers: HeadersInit): Record<string, string> {
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return headers as Record<string, string>;
+}
+
+/** Node https fallback when global fetch fails (common on Windows dev) */
+function httpsRequest(
+  url: string,
+  headers: Record<string, string>
+): Promise<{ status: number; statusText: string; body: string }> {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      url,
+      { method: 'GET', headers, agent: httpsAgent, family: 4 },
+      (res) => {
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          body += chunk;
+        });
+        res.on('end', () => {
+          resolve({
+            status: res.statusCode ?? 0,
+            statusText: res.statusMessage ?? '',
+            body,
+          });
+        });
+      }
+    );
+
+    req.on('error', reject);
+    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      req.destroy(new Error('Request timeout'));
+    });
+    req.end();
+  });
+}
+
+async function performRequest(
+  url: string,
+  headers: HeadersInit
+): Promise<{ status: number; statusText: string; body: string }> {
+  const headerRecord = headersToRecord(headers);
+  const isDev = process.env.NODE_ENV === 'development';
+
+  const fetchRequest = async () => {
+    const response = await fetch(url, {
+      headers,
+      ...(isDev ? { cache: 'no-store' as const } : { next: { revalidate: 3600 } }),
+    });
+
+    return {
+      status: response.status,
+      statusText: response.statusText,
+      body: await response.text(),
+    };
+  };
+
+  // Node's native https is more reliable than undici fetch on Windows dev
+  if (isNodeServer) {
+    try {
+      return await httpsRequest(url, headerRecord);
+    } catch (httpsError) {
+      try {
+        return await fetchRequest();
+      } catch (fetchError) {
+        const httpsMsg =
+          httpsError instanceof Error ? httpsError.message : String(httpsError);
+        const fetchMsg =
+          fetchError instanceof Error ? fetchError.message : String(fetchError);
+        throw new Error(`https failed (${httpsMsg}); fetch failed (${fetchMsg})`);
+      }
+    }
+  }
+
+  try {
+    return await fetchRequest();
+  } catch (fetchError) {
+    try {
+      return await httpsRequest(url, headerRecord);
+    } catch (httpsError) {
+      const fetchMsg =
+        fetchError instanceof Error ? fetchError.message : String(fetchError);
+      const httpsMsg =
+        httpsError instanceof Error ? httpsError.message : String(httpsError);
+      throw new Error(`fetch failed (${fetchMsg}); https failed (${httpsMsg})`);
+    }
+  }
 }
 
 async function tmdbFetch<T>(
@@ -57,20 +184,51 @@ async function tmdbFetch<T>(
   });
 
   const headers = buildAuth(url);
+  let lastError: unknown;
 
-  const response = await fetch(url.toString(), {
-    headers,
-    next: { revalidate: 3600 },
-  });
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { status, statusText, body } = await performRequest(
+        url.toString(),
+        headers
+      );
 
-  if (!response.ok) {
-    throw new Error(
-      `TMDB API error: ${response.status} ${response.statusText}. ` +
-        'Check API_READ_ACCESS_TOKEN or TMDB_API_KEY in .env.local.'
-    );
+      if (status === 401 || status === 403) {
+        throw new TmdbError(
+          `TMDB auth error (${status}). Check API_READ_ACCESS_TOKEN or TMDB_API_KEY in .env.local.`,
+          'auth'
+        );
+      }
+
+      if (status < 200 || status >= 300) {
+        throw new TmdbError(
+          `TMDB API error: ${status} ${statusText}`,
+          'http'
+        );
+      }
+
+      return JSON.parse(body) as T;
+    } catch (error) {
+      lastError = error;
+      if (error instanceof TmdbError && error.code !== 'network') {
+        throw error;
+      }
+      if (attempt < MAX_ATTEMPTS) {
+        await sleep(400 * attempt);
+      }
+    }
   }
 
-  return response.json() as Promise<T>;
+  const detail =
+    lastError instanceof Error ? lastError.message : String(lastError);
+  throw new TmdbError(
+    `Could not reach TMDB after ${MAX_ATTEMPTS} attempts (${detail}). Check your connection or try again shortly.`,
+    'network'
+  );
+}
+
+export function isTmdbNetworkError(error: unknown): boolean {
+  return error instanceof TmdbError && error.code === 'network';
 }
 
 export async function getTrending(
@@ -187,7 +345,6 @@ export async function getGenres(
   return tmdbFetch<GenreListResponse>(`/genre/${mediaType}/list`);
 }
 
-/** Pick the best YouTube trailer from TMDB video results */
 export function findTrailer(videos: Video[]): Video | null {
   const youtubeVideos = videos.filter((v) => v.site === 'YouTube');
 

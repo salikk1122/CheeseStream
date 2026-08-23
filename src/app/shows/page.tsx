@@ -2,9 +2,11 @@ export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import ContentUnavailable from '@/components/ContentUnavailable';
 import GenreFilterBar from '@/components/GenreFilterBar';
-import PosterCard from '@/components/PosterCard';
-import { getDiscover, getGenres } from '@/lib/tmdb';
+import MediaGrid from '@/components/MediaGrid';
+import { getDiscover, getGenres, isTmdbNetworkError } from '@/lib/tmdb';
+import type { Genre, PaginatedResponse, MediaItem } from '@/types';
 
 export const metadata: Metadata = {
   title: 'TV Shows',
@@ -14,49 +16,75 @@ interface PageProps {
   searchParams: { genre?: string; page?: string };
 }
 
+const emptyDiscover: PaginatedResponse<MediaItem> = {
+  page: 1,
+  results: [],
+  total_pages: 0,
+  total_results: 0,
+};
+
 export default async function ShowsPage({ searchParams }: PageProps) {
   const genreId = searchParams.genre
     ? Number(searchParams.genre)
     : undefined;
   const page = Number(searchParams.page) || 1;
 
-  const [genres, discover] = await Promise.all([
-    getGenres('tv'),
-    getDiscover('tv', { genreId, page }),
-  ]);
+  let genres: { genres: Genre[] } = { genres: [] };
+  let discover = emptyDiscover;
+  let loadFailed = false;
+
+  try {
+    [genres, discover] = await Promise.all([
+      getGenres('tv'),
+      getDiscover('tv', { genreId, page }),
+    ]);
+  } catch (error) {
+    if (!isTmdbNetworkError(error)) throw error;
+    loadFailed = true;
+  }
 
   const activeGenre = genres.genres.find((g) => g.id === genreId);
 
   return (
-    <div className="min-h-screen pb-12 pt-24">
+    <div className="min-h-screen pb-24 pt-20 sm:pt-24 md:pb-12">
       <div className="px-4 md:px-8 lg:px-12">
-        <h1 className="mb-2 font-display text-3xl tracking-wide text-white md:text-4xl">
+        <h1 className="mb-2 font-display text-2xl tracking-wide text-white sm:text-3xl md:text-4xl">
           TV Shows
         </h1>
         {activeGenre && (
-          <p className="mb-4 text-muted">Genre: {activeGenre.name}</p>
+          <p className="mb-4 text-sm text-muted">Genre: {activeGenre.name}</p>
         )}
       </div>
 
-      <Suspense fallback={null}>
-        <GenreFilterBar genres={genres.genres} basePath="/shows" />
-      </Suspense>
+      {loadFailed ? (
+        <ContentUnavailable />
+      ) : (
+        <>
+          <Suspense fallback={null}>
+            <GenreFilterBar genres={genres.genres} basePath="/shows" />
+          </Suspense>
 
-      <div className="flex flex-wrap gap-4 px-4 md:px-8 lg:px-12">
-        {discover.results.map((item) => (
-          <PosterCard key={item.id} item={{ ...item, name: item.name ?? '' }} />
-        ))}
-      </div>
+          <div className="px-4 md:px-8 lg:px-12">
+            <MediaGrid
+              items={discover.results.map((item) => ({
+                ...item,
+                name: item.name ?? '',
+                media_type: 'tv' as const,
+              }))}
+            />
+          </div>
 
-      {discover.total_pages > 1 && page < discover.total_pages && (
-        <div className="mt-8 text-center">
-          <a
-            href={`/shows?${genreId ? `genre=${genreId}&` : ''}page=${page + 1}`}
-            className="btn-secondary inline-flex"
-          >
-            Load More
-          </a>
-        </div>
+          {discover.total_pages > 1 && page < discover.total_pages && (
+            <div className="mt-8 text-center">
+              <a
+                href={`/shows?${genreId ? `genre=${genreId}&` : ''}page=${page + 1}`}
+                className="btn-secondary inline-flex"
+              >
+                Load More
+              </a>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

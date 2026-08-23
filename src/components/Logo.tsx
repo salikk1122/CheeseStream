@@ -29,7 +29,7 @@ export default function Logo({
         />
       )}
       <span
-        className={`font-display whitespace-nowrap tracking-wide text-white transition-all duration-300 ease-out ${
+        className={`hidden font-display whitespace-nowrap tracking-wide text-white transition-all duration-300 ease-out sm:inline ${
           compact
             ? 'max-w-0 translate-x-1 opacity-0'
             : 'max-w-[12rem] translate-x-0 opacity-100'

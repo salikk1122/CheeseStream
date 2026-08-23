@@ -56,18 +56,18 @@ export default function CarouselRow({
 
   return (
     <section
-      className="group/row relative mb-10"
+      className="group/row relative mb-6 sm:mb-8 md:mb-10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="mb-4 flex items-center justify-between px-4 md:px-8 lg:px-12">
-        <h2 className="font-display text-xl tracking-wide text-white md:text-2xl">
+      <div className="mb-3 flex items-end justify-between gap-3 px-4 sm:mb-4 md:px-8 lg:px-12">
+        <h2 className="font-display text-lg tracking-wide text-white sm:text-xl md:text-2xl">
           {title}
         </h2>
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="text-sm font-medium text-muted transition-colors hover:text-accent"
+            className="shrink-0 text-xs font-medium text-muted transition-colors hover:text-accent sm:text-sm"
           >
             View All &rarr;
           </Link>
@@ -75,7 +75,6 @@ export default function CarouselRow({
       </div>
 
       <div className="relative">
-        {/* Left chevron — desktop only, visible on row hover */}
         {canScrollLeft && isHovered && (
           <button
             onClick={() => scroll('left')}
@@ -87,7 +86,7 @@ export default function CarouselRow({
         )}
 
         <div className="overflow-hidden px-4 md:px-8 lg:px-12" ref={emblaRef}>
-          <div className="flex gap-3 py-6 md:gap-4">
+          <div className="flex gap-2.5 py-3 sm:gap-3 sm:py-4 md:gap-4 md:py-6">
             {loading
               ? Array.from({ length: 8 }).map((_, i) => (
                   <PosterCardSkeleton key={i} />
@@ -102,7 +101,6 @@ export default function CarouselRow({
           </div>
         </div>
 
-        {/* Right chevron */}
         {canScrollRight && isHovered && (
           <button
             onClick={() => scroll('right')}

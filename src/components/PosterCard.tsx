@@ -17,12 +17,18 @@ import {
 interface PosterCardProps {
   item: MediaItem;
   priority?: boolean;
+  /** Stretch to parent width (for CSS grids) */
+  fill?: boolean;
 }
 
-const cardWidth =
-  'w-[calc((100vw-2rem)/2.5)] sm:w-[calc((100vw-4rem)/4)] md:w-[calc((100vw-6rem)/5)] lg:w-[calc((100vw-8rem)/7)] xl:w-[180px]';
+const carouselWidth =
+  'w-[38vw] max-w-[160px] sm:w-[calc((100vw-4rem)/4)] sm:max-w-none md:w-[calc((100vw-6rem)/5)] lg:w-[calc((100vw-8rem)/7)] xl:w-[180px]';
 
-export default function PosterCard({ item, priority = false }: PosterCardProps) {
+export default function PosterCard({
+  item,
+  priority = false,
+  fill = false,
+}: PosterCardProps) {
   const title = getMediaTitle(item);
   const href = getMediaHref(item);
   const watchHref = getWatchHref(item);
@@ -30,10 +36,16 @@ export default function PosterCard({ item, priority = false }: PosterCardProps) 
   const year = getYear(item.release_date ?? item.first_air_date);
 
   return (
-    <div className="group relative shrink-0 snap-start hover:z-30">
+    <div
+      className={`group relative snap-start ${
+        fill ? 'w-full' : 'shrink-0'
+      } md:hover:z-30`}
+    >
       <Link href={href} className="block">
         <article
-          className={`relative aspect-[2/3] ${cardWidth} overflow-hidden rounded-xl bg-[#0a1628] shadow-md transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-3 group-hover:scale-110 group-hover:shadow-[0_24px_48px_rgba(0,0,0,0.7)]`}
+          className={`poster-card relative aspect-[2/3] overflow-hidden rounded-xl bg-[#0a1628] shadow-md ${
+            fill ? 'w-full' : carouselWidth
+          }`}
         >
           {posterUrl ? (
             <Image
@@ -41,7 +53,7 @@ export default function PosterCard({ item, priority = false }: PosterCardProps) 
               alt={title}
               fill
               sizes="(max-width: 640px) 40vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 180px"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="object-cover transition-transform duration-500 ease-out md:group-hover:scale-[1.03]"
               priority={priority}
             />
           ) : (
@@ -50,23 +62,28 @@ export default function PosterCard({ item, priority = false }: PosterCardProps) 
             </div>
           )}
 
-          {/* Gold inset frame on hover */}
+          {/* Mobile / touch: always-visible title */}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 pb-2 pt-8 md:hidden">
+            <p className="line-clamp-1 text-center text-[11px] font-semibold text-white">
+              {title}
+            </p>
+          </div>
+
+          {/* Desktop hover UI */}
           <div
-            className="pointer-events-none absolute inset-0 opacity-0 transition-all duration-300 group-hover:inset-[10px] group-hover:bottom-14 group-hover:opacity-100"
+            className="pointer-events-none absolute inset-0 hidden opacity-0 transition-all duration-300 md:block md:group-hover:inset-[10px] md:group-hover:bottom-14 md:group-hover:opacity-100"
             aria-hidden="true"
           >
             <div className="h-full w-full rounded-md border-2 border-accent/85" />
           </div>
 
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/55" />
+          <div className="absolute inset-0 hidden bg-black/0 transition-colors duration-300 md:block md:group-hover:bg-black/55" />
 
-          {/* Centered hover content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-3 opacity-0 transition-all duration-300 group-hover:opacity-100">
+          <div className="absolute inset-0 hidden flex-col items-center justify-center px-3 opacity-0 transition-all duration-300 md:flex md:group-hover:opacity-100">
             <Link
               href={watchHref}
               onClick={(e) => e.stopPropagation()}
-              className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-200 hover:scale-105"
+              className="pointer-events-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-200 hover:scale-105"
               aria-label={`Watch trailer for ${title}`}
             >
               <Play className="ml-0.5 h-6 w-6 fill-black text-black" />
@@ -84,8 +101,7 @@ export default function PosterCard({ item, priority = false }: PosterCardProps) 
             </p>
           </div>
 
-          {/* Bottom title bar */}
-          <div className="absolute inset-x-0 bottom-0 translate-y-full border-t border-accent/0 bg-[#0a1628]/0 px-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:border-accent/70 group-hover:bg-[#0a1628]/95 group-hover:py-2.5 group-hover:opacity-100">
+          <div className="absolute inset-x-0 bottom-0 hidden translate-y-full border-t border-accent/0 bg-[#0a1628]/0 px-3 opacity-0 transition-all duration-300 md:block md:group-hover:translate-y-0 md:group-hover:border-accent/70 md:group-hover:bg-[#0a1628]/95 md:group-hover:py-2.5 md:group-hover:opacity-100">
             <p className="line-clamp-1 text-center font-display text-xs tracking-[0.2em] text-accent/90 uppercase">
               {title}
             </p>
@@ -96,11 +112,13 @@ export default function PosterCard({ item, priority = false }: PosterCardProps) 
   );
 }
 
-export function PosterCardSkeleton() {
+export function PosterCardSkeleton({ fill = false }: { fill?: boolean }) {
   return (
-    <div className="shrink-0 snap-start">
+    <div className={`snap-start ${fill ? 'w-full' : 'shrink-0'}`}>
       <div
-        className={`aspect-[2/3] ${cardWidth} rounded-xl skeleton`}
+        className={`aspect-[2/3] rounded-xl skeleton ${
+          fill ? 'w-full' : carouselWidth
+        }`}
       />
     </div>
   );
