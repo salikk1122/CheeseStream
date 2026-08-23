@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -30,11 +30,24 @@ function isActive(pathname: string, href: string) {
 export default function Navbar() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-4 pt-4 md:px-8 md:pt-5 lg:px-12">
       <div className="pointer-events-auto flex items-start justify-between gap-4">
-        <Logo className="origin-left scale-90 opacity-90" />
+        <Logo
+          compact={scrolled}
+          className={`origin-left transition-all duration-300 ease-out ${
+            scrolled ? 'scale-100 opacity-100' : 'scale-90 opacity-90'
+          }`}
+        />
 
         <nav
           className="glass-pill relative flex max-w-[calc(100vw-2rem)] shrink-0 items-center gap-0.5 overflow-x-auto rounded-full px-1.5 py-1.5 scrollbar-hide sm:max-w-none sm:gap-1 sm:px-2"

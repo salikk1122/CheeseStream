@@ -87,7 +87,7 @@ export default function CarouselRow({
         )}
 
         <div className="overflow-hidden px-4 md:px-8 lg:px-12" ref={emblaRef}>
-          <div className="flex gap-3 md:gap-4">
+          <div className="flex gap-3 py-6 md:gap-4">
             {loading
               ? Array.from({ length: 8 }).map((_, i) => (
                   <PosterCardSkeleton key={i} />

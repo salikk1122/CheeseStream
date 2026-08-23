@@ -4,22 +4,25 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
+  Calendar,
   Check,
-  Download,
-  EyeOff,
+  CircleHelp,
+  Clock,
   Play,
   Plus,
+  Rocket,
+  Star,
 } from 'lucide-react';
 import type { MediaDetails } from '@/types';
 import { getDetailsTitle, isMovie } from '@/types';
 import {
   BACKDROP_SIZES,
+  formatRating,
   getImageUrl,
   getWatchHref,
   getYear,
 } from '@/lib/utils';
 import { useWatchlistStore } from '@/store/watchlist';
-import RatingBadge from './RatingBadge';
 
 interface DetailHeaderProps {
   details: MediaDetails;
@@ -40,6 +43,7 @@ export default function DetailHeader({
     BACKDROP_SIZES.original
   );
   const watchHref = getWatchHref({ id: details.id, media_type: mediaType });
+  const primaryGenre = details.genres?.[0]?.name;
 
   const { toggleItem, isInList } = useWatchlistStore();
   const inList = isInList(details.id, mediaType);
@@ -53,7 +57,7 @@ export default function DetailHeader({
       : null;
 
   return (
-    <section className="relative min-h-[60vh] w-full">
+    <section className="relative min-h-[70vh] w-full">
       {backdropUrl && (
         <div className="absolute inset-0">
           <Image
@@ -71,86 +75,59 @@ export default function DetailHeader({
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
       <div className="relative px-4 pb-12 pt-28 md:px-8 lg:px-12">
-        <div className="max-w-3xl space-y-4">
+        <div className="max-w-3xl space-y-5">
           <h1 className="font-display text-4xl tracking-wide text-white md:text-6xl lg:text-7xl">
             {title}
           </h1>
 
           {details.tagline && (
-            <p className="text-lg italic text-gray-300">{details.tagline}</p>
+            <p className="text-lg italic text-white/70">{details.tagline}</p>
           )}
 
-          <div className="flex flex-wrap items-center gap-3">
-            <RatingBadge rating={details.vote_average} size="lg" showLabel />
+          {/* Rating · Year · Genre (and runtime when available) */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white md:text-base">
+            <span className="inline-flex items-center gap-1.5">
+              <Star className="h-4 w-4 fill-white text-white" />
+              {formatRating(details.vote_average)}/10
+            </span>
             {year && (
-              <span className="rounded bg-white/10 px-2 py-1 text-sm">
-                {year}
-              </span>
+              <>
+                <span className="text-white/50" aria-hidden="true">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4" />
+                  {year}
+                </span>
+              </>
+            )}
+            {primaryGenre && (
+              <>
+                <span className="text-white/50" aria-hidden="true">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Rocket className="h-4 w-4" />
+                  {primaryGenre}
+                </span>
+              </>
             )}
             {runtime && (
-              <span className="text-sm text-gray-300">{runtime}</span>
-            )}
-            {details.adult && (
-              <span className="rounded border border-white/30 px-2 py-0.5 text-xs font-bold">
-                R
-              </span>
-            )}
-          </div>
-
-          {details.genres && details.genres.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {details.genres.map((genre) => (
-                <span
-                  key={genre.id}
-                  className="rounded-full border border-white/20 px-3 py-1 text-xs text-gray-300"
-                >
-                  {genre.name}
+              <>
+                <span className="text-white/50" aria-hidden="true">
+                  ·
                 </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-3">
-            <Link href={watchHref} className="btn-primary">
-              <Play className="h-5 w-5 fill-current" />
-              Play
-            </Link>
-            <button
-              onClick={() =>
-                toggleItem({
-                  id: details.id,
-                  type: mediaType,
-                  title,
-                  poster_path: details.poster_path,
-                  vote_average: details.vote_average,
-                })
-              }
-              className={`btn-secondary ${inList ? 'bg-accent/20 text-accent' : ''}`}
-            >
-              {inList ? (
-                <Check className="h-5 w-5" />
-              ) : (
-                <Plus className="h-5 w-5" />
-              )}
-              {inList ? 'In My List' : 'My List'}
-            </button>
-            <button
-              disabled
-              className="btn-secondary cursor-not-allowed opacity-50"
-              title="Download not available in demo"
-            >
-              <Download className="h-5 w-5" />
-              Download
-            </button>
-            <button className="btn-secondary">
-              <EyeOff className="h-5 w-5" />
-              Hide
-            </button>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
+                  {runtime}
+                </span>
+              </>
+            )}
           </div>
 
           <div>
             <p
-              className={`text-sm leading-relaxed text-gray-200 md:text-base ${
+              className={`max-w-2xl text-sm leading-relaxed text-white/90 md:text-base ${
                 expanded ? '' : 'line-clamp-3'
               }`}
             >
@@ -164,6 +141,49 @@ export default function DetailHeader({
                 {expanded ? 'Show Less' : 'Read More'}
               </button>
             )}
+          </div>
+
+          {/* Play + glass action pill */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Link
+              href={watchHref}
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02] hover:bg-white/95 md:text-base"
+            >
+              <Play className="h-5 w-5 fill-black" />
+              Play
+            </Link>
+
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-white/20 bg-black/35 backdrop-blur-md">
+              <button
+                type="button"
+                onClick={() =>
+                  toggleItem({
+                    id: details.id,
+                    type: mediaType,
+                    title,
+                    poster_path: details.poster_path,
+                    vote_average: details.vote_average,
+                  })
+                }
+                className="flex h-12 w-12 items-center justify-center text-white transition-colors hover:bg-white/10"
+                aria-label={inList ? 'Remove from My List' : 'Add to My List'}
+              >
+                {inList ? (
+                  <Check className="h-5 w-5 text-accent" />
+                ) : (
+                  <Plus className="h-5 w-5" strokeWidth={2.25} />
+                )}
+              </button>
+              <div className="h-6 w-px bg-white/25" aria-hidden="true" />
+              <button
+                type="button"
+                onClick={() => setExpanded((prev) => !prev)}
+                className="flex h-12 w-12 items-center justify-center text-white transition-colors hover:bg-white/10"
+                aria-label={expanded ? 'Collapse overview' : 'Expand overview'}
+              >
+                <CircleHelp className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
